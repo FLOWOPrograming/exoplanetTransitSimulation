@@ -5,6 +5,7 @@ import sys
 import math
 
 import mathp
+import graphing
 
 class SpaceObject:
     def __init__(self, radius, colour):
@@ -32,42 +33,11 @@ clock = pygame.time.Clock()
 
 # Create space objects
 star = SpaceObject(radius=100, colour=(255, 255, 150))
-planet = SpaceObject(radius=50, colour=(50, 20, 20))
+planet = SpaceObject(radius=5, colour=(50, 20, 20))
 planet.pos = (planet.pos[0] - star.radius - planet.radius - 50, planet.pos[1])
 
 # Graph
 graph = []
-
-def draw_graph(screen, graph, bottom_left, top_right):
-    last_coord = (0, 0)
-
-    GRAPH_SIZE = len(graph)
-
-    sorted_graph = graph.copy()
-    sorted_graph.sort()
-
-    HILO_DATA = (sorted_graph[GRAPH_SIZE-1], sorted_graph[0])
-    AMPLITUDE = HILO_DATA[0] - HILO_DATA[1]
-    SIZE = (top_right[0] - bottom_left[0], bottom_left[1] - top_right[1])
-
-    STEP = (SIZE[0] / GRAPH_SIZE, 400)
-
-    for i, ratio in enumerate(graph):
-        x = bottom_left[0] + STEP[0] * (i + 1)
-        y = ratio * STEP[1] # Calculate raw y data
-        y = SIZE[1] - y # Flip the graph
-
-        if HILO_DATA[1] == 1:
-            y = 0
-        else:
-            y *= 1/(1-HILO_DATA[1])
-        y = y + top_right[1] # Position it correctly
-
-        #print(HILO_DATA, SIZE, STEP[1])
-
-        if not i == 0:
-            pygame.draw.line(screen, (255, 100, 100), last_coord, (int(x), int(y)), 2)
-        last_coord = (x, y)
 
 def main():
     graph_time = 0
@@ -111,7 +81,7 @@ def main():
         screen.fill((0, 0, 0))  # Clear the screen
         star.draw(screen)  # Draw the space object
         planet.draw(screen)
-        draw_graph(screen, graph, (700, 500), (1100, 100))  # Draw the graph
+        graphing.graph(screen, graph, (700, 500), (1100, 100))  # Draw the graph
 
         pygame.display.flip()  # Update the display
         clock.tick(FPS)  # Cap the frame rate
