@@ -75,7 +75,7 @@ def draw_scale(screen, graph, bottom_left, top_right):
         # text
         text = font.render(str(x_val), True, (255, 255, 255))
         text_rect = text.get_rect()
-        text_rect.center = (prev_x, bottom_left[1] + 10)
+        text_rect.center = (prev_x, bottom_left[1] + 20)
         text = pygame.transform.rotate(text, -90)
 
         screen.blit(text, text_rect)

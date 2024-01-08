@@ -6,6 +6,7 @@ import sys
 import mathp
 import graphing
 import spaceObject
+import GUI
 
 pygame.init()
 
@@ -80,14 +81,41 @@ def main():
                                (min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2, min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2),
                                DISTANCE_FROM_STAR)
 
+    starRadiusInput = GUI.InputBox((400, 500), (100, 40), availableSymbols="0123456789", default_value="100")
+    planetRadiusInput = GUI.InputBox((400, 550), (100, 40), availableSymbols="0123456789", default_value="10")
+
+    starRadiusText = GUI.Text((220, 500), 'assets/fonts/Roboto-Black.ttf', 32, text="Star radius: ")
+    planetRadiusText = GUI.Text((186, 550), 'assets/fonts/Roboto-Black.ttf', 32, text="Planet radius: ")
+
     # Main loop
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                starRadiusInput.key_press(event.key)
+                planetRadiusInput.key_press(event.key)
 
-        should_update = update_positions(star, planet, 0.45)
+                if int(planetRadiusInput.text) > int(starRadiusInput.text):
+                    if(planetRadiusInput.change == True):
+                        planetRadiusInput.revert_press()
+                    if(starRadiusInput.change == True):
+                        starRadiusInput.revert_press()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                starRadiusInput.click(pygame.mouse.get_pos())
+                planetRadiusInput.click(pygame.mouse.get_pos())
+
+        if starRadiusInput.change or planetRadiusInput.change:
+            star, planet, graph = reset(int(starRadiusInput.text), int(planetRadiusInput.text), 100,
+                                        (min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2, min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2),
+                                        DISTANCE_FROM_STAR)
+            starRadiusInput.change = False
+            planetRadiusInput.change = False
+            continue
+
+        should_update = update_positions(star, planet, 1)
 
         if should_update:
             ratio = calculate_overlap_ratio(star, planet)
@@ -98,6 +126,13 @@ def main():
         screen.fill((0, 0, 0))  # Clear the screen
         star.draw(screen)  # Draw the space object
         planet.draw(screen)
+
+        starRadiusInput.draw(screen)
+        planetRadiusInput.draw(screen)
+
+        starRadiusText.draw(screen)
+        planetRadiusText.draw(screen)
+
         graphing.graph(screen, graph, (SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT - 100), (SCREEN_WIDTH - 50, 50))  # Draw the graph
 
         pygame.display.flip()  # Update the display
