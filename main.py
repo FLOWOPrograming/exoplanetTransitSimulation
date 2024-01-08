@@ -2,45 +2,80 @@ import random
 
 import pygame
 import sys
-import math
 
 import mathp
 import graphing
-
-class SpaceObject:
-    def __init__(self, radius, colour):
-        self.radius = radius
-        self.colour = colour
-        self.pos = (min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2, min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2)
-
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.colour, self.pos, self.radius)
+import spaceObject
 
 pygame.init()
 
 # Constants
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1920/1.4
+SCREEN_HEIGHT = 1080/1.4
+DISTANCE_FROM_STAR = 10
 FPS = 60
-GRAPH_START = (600, 600)
+
+# Set up the objects
 rng = random
+clock = pygame.time.Clock()
 
 # Set up the display
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Exoplanet transit")
 
-clock = pygame.time.Clock()
+# Set up objects
+star, planet, graph = (0, 0, 0)
 
-# Create space objects
-star = SpaceObject(radius=100, colour=(255, 255, 150))
-planet = SpaceObject(radius=5, colour=(50, 20, 20))
-planet.pos = (planet.pos[0] - star.radius - planet.radius - 50, planet.pos[1])
+def set_objects(star_radius, planet_radius, targer_radius, pos, distance_from_star):
+    scale = targer_radius / star_radius
 
-# Graph
-graph = []
+    star = spaceObject.SpaceObject(star_radius * scale, (255, 255, 150), pos)
+    planet = spaceObject.SpaceObject(planet_radius * scale, (50, 20, 20), (0, 0))
+    planet.pos = (star.pos[0] - star.radius - planet.radius - distance_from_star, star.pos[1])
+
+    return star, planet
+
+
+def update_positions(star, planet, speed):
+    # Update logic goes here
+    planet.pos = [planet.pos[0] + speed, planet.pos[1]]
+
+    max_distance = star.pos[0] + star.radius + planet.radius + DISTANCE_FROM_STAR
+
+    if max_distance < planet.pos[0]:  # check if the planet is max distance away from the star
+        planet.pos = (max_distance, planet.pos[1])
+        return False
+
+    return True
+
+def reset(star_radius, planet_radius, targer_radius, pos, distance_from_star):
+    star, planet = set_objects(star_radius, planet_radius, targer_radius, pos, distance_from_star)
+
+    return star, planet, []
+
+def calculate_overlap_ratio(star, planet):
+    distance = abs(planet.pos[0] - star.pos[0])
+
+    if distance <= star.radius - planet.radius:  # planet is inside the sun fully
+        difference = mathp.circle_area(star.radius) - mathp.circle_area(planet.radius)
+        ratio = difference / mathp.circle_area(star.radius)
+
+        return ratio
+    elif distance >= star.radius + planet.radius:  # planet is fully outside the sun
+        return 1
+    else:  # planet and sun is intersecting
+        overlap = mathp.calculate_intersection_area(star.radius, planet.radius, distance)
+        star_area = mathp.circle_area(star.radius)
+        difference = star_area - overlap
+        ratio = difference / star_area
+
+        return ratio
+
 
 def main():
-    graph_time = 0
+    star, planet, graph = reset(100, 10, 100,
+                               (min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2, min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2),
+                               DISTANCE_FROM_STAR)
 
     # Main loop
     while True:
@@ -49,42 +84,21 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        # Update logic goes here
-        if planet.pos[0] + 1 < star.pos[0] + star.radius + planet.radius + 50:
-            planet.pos = [planet.pos[0] + 1, planet.pos[1]]
+        should_update = update_positions(star, planet, 2)
 
-            distance = math.sqrt((planet.pos[0] - star.pos[0]) ** 2)
-            ratio = 0
-
-            if (distance <= star.radius-planet.radius):
-                difference = mathp.circle_area(star.radius) - mathp.circle_area(planet.radius)
-                ratio = difference / mathp.circle_area(star.radius)
-            elif (distance >= star.radius + planet.radius):
-                ratio = 1
-            elif (distance <= star.radius and distance > star.radius - planet.radius):
-                overlap = mathp.calculate_intersection_area(star.radius, planet.radius, distance)
-                star_area = mathp.circle_area(star.radius)
-                difference = star_area - overlap
-                ratio = difference / star_area
-            else:
-                overlap = mathp.calculate_intersection_area(star.radius, planet.radius, distance)
-                star_area = mathp.circle_area(star.radius)
-                difference = star_area - overlap
-                ratio = difference / star_area
-
-            #ratio += rng.randint(0, 100) / 20000
-
+        if should_update:
+            ratio = calculate_overlap_ratio(star, planet)
             graph.append(ratio)
-            graph_time += 1
 
         # Drawing
         screen.fill((0, 0, 0))  # Clear the screen
         star.draw(screen)  # Draw the space object
         planet.draw(screen)
-        graphing.graph(screen, graph, (700, 500), (1100, 100))  # Draw the graph
+        graphing.graph(screen, graph, (SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT - 100), (SCREEN_WIDTH - 50, 50))  # Draw the graph
 
         pygame.display.flip()  # Update the display
         clock.tick(FPS)  # Cap the frame rate
+
 
 if __name__ == "__main__":
     main()
