@@ -38,7 +38,7 @@ def draw_boundaries(screen, bottom_left, top_right):
     pygame.draw.line(screen, (255, 255, 255), (top_right[0], bottom_left[1]), bottom_left, 2)
 
 def draw_scale(screen, graph, bottom_left, top_right):
-    font = pygame.font.Font()
+    font = pygame.font.Font('assets/fonts/Roboto-Black.ttf', 15)
 
     GRAPH_SIZE = len(graph)
     sorted_graph = graph.copy()
@@ -66,13 +66,9 @@ def draw_scale(screen, graph, bottom_left, top_right):
     prev_y = top_right[1]
     col_map_y = SMALL_SCALE_Y * MIN_DATA_PER_LINE * 255 / SIZE[1]
 
-    while True:
-        prev_x += SMALL_SCALE_X
-        if prev_x > top_right[0]:
-            break
-
+    while not prev_x > top_right[0]:
         rel_x = prev_x- bottom_left[0]
-        x_val = math.ceil(rel_x / STEP[0])
+        x_val = round(rel_x / STEP[0])
 
         pygame.draw.line(screen, (col_map_x, col_map_x, col_map_x), (prev_x, bottom_left[1]), (prev_x, top_right[1]))
 
@@ -84,13 +80,10 @@ def draw_scale(screen, graph, bottom_left, top_right):
 
         screen.blit(text, text_rect)
 
-    while True:
-        prev_y += SMALL_SCALE_Y
-        if prev_y > bottom_left[1]:
-            break
+        prev_x += SMALL_SCALE_X
 
+    while not prev_y > bottom_left[1]:
         rel_y = prev_y - top_right[1]
-        y_val = round(((((SIZE[1] - rel_y) / (STEP[1])) - 1) * AMPLITUDE + 1)*100)/100
         y_val = ((((SIZE[1] - rel_y) / (STEP[1])) - 1) * AMPLITUDE + 1)
 
         pygame.draw.line(screen, (col_map_y, col_map_y, col_map_y), (bottom_left[0], prev_y), (top_right[0], prev_y))
@@ -102,6 +95,8 @@ def draw_scale(screen, graph, bottom_left, top_right):
         text_rect.right = bottom_left[0] - 10
 
         screen.blit(text, text_rect)
+
+        prev_y += SMALL_SCALE_Y
 
     #draw big scale lines
     prev_x = bottom_left[0]

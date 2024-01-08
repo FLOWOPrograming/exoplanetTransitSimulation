@@ -69,11 +69,14 @@ def calculate_overlap_ratio(star, planet):
         difference = star_area - overlap
         ratio = difference / star_area
 
+        if ratio > 1:
+            ratio = 1
+
         return ratio
 
 
 def main():
-    star, planet, graph = reset(100, 10, 100,
+    star, planet, graph = reset(100, 50, 100,
                                (min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2, min(SCREEN_WIDTH, SCREEN_HEIGHT) / 2),
                                DISTANCE_FROM_STAR)
 
@@ -84,10 +87,11 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        should_update = update_positions(star, planet, 2)
+        should_update = update_positions(star, planet, 0.45)
 
         if should_update:
             ratio = calculate_overlap_ratio(star, planet)
+
             graph.append(ratio)
 
         # Drawing
