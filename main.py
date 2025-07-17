@@ -40,7 +40,7 @@ class Simulation:
     def _create_objects(self, star_radius, planet_radius, target_radius, center_pos, distance):
         scale = target_radius / star_radius
         star = spaceObject.SpaceObject(star_radius * scale, (255, 255, 150), center_pos)
-        planet = spaceObject.SpaceObject(planet_radius * scale, (50, 20, 20), (0, 0))
+        planet = spaceObject.SpaceObject(planet_radius * scale, (70, 30, 30), (0, 0))
         planet.pos = (
             star.pos[0] - star.radius - planet.radius - distance,
             star.pos[1]

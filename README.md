@@ -21,7 +21,7 @@ A simple exoplanet transit simulator based in PyGame that gives you a graph of t
 - The program sometimes crashes in mathp.py when the user inputs incorrect star and planet radii.
 - The window doesn't scale.
 - The graph class is barely readable.
-- The floats appear 
+- The floats appear with too many points of precision.
 
 ## Future additions
 
